@@ -4,5 +4,13 @@ using UnityEngine;
 
 public class SawController : MonoBehaviour
 {
-	
+    void Start()
+    {
+        StartCoroutine(SawAttack());
+    }
+    IEnumerator SawAttack()
+    {
+        yield return new WaitForSeconds(2f);
+        Destroy(gameObject);
+    }
 }

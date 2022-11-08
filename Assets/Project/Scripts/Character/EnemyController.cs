@@ -9,31 +9,64 @@ public class EnemyController : CharacterController
     [SerializeField] WeaponController m_Weapon;
 
     PlayerController m_Player;
-
+    public float timer = 0;
     public override void Start()
     {
         base.Start();
         m_speed = speedRun;
         m_Player = FindObjectOfType<PlayerController>();
+        Run();
     }
-
-
-    private void FixedUpdate()
+    public virtual void Run()
     {
-        if (m_status == Status.Run)
+        StartCoroutine(PlayerBehavior());
+    }
+    IEnumerator PlayerBehavior()
+    {
+        while (m_status != Status.Death)
+        {
+            switch (m_status)
             {
-            if (Vector3.Distance(m_Player.position, transform.position) > 0.7f)
-            {
-                Vector3 direction = Vector3.Normalize(m_Player.position - transform.position);
-                Move(direction);
+                case Status.Idle:
+                    yield return new WaitForSeconds(sleepTime);
+                    m_status = Status.Run;
+                    break;
+
+                case Status.Attack:
+                    attack = true;
+                    yield return new WaitForSeconds(1.5f);
+                    m_status = Status.Run;
+                    break;
+
+                case Status.Run:
+                    timer += Time.deltaTime;
+                    Vector3 direction = Vector3.Normalize(m_Player.position - transform.position);
+                    Move(direction);
+                    if (timer > 2f)
+                    {
+                        m_status = Status.Attack;
+                        timer = 0;
+                    }
+                    yield return null;
+
+                    break;
+
+                default:
+                    break;
             }
         }
-        if (m_status == Status.Attack)
-        {
-            m_Weapon.Spawner();
-        }
     }
 
+    void OnCollisionEnter(Collision collision)
+    {
+        //if (collision.gameObject.tag.Equals("enemy"))
+        //{
+        //    m_status = Status.Death;
+        //}
+        //if (collision.gameObject.tag.Equals("win"))
+        //{
 
-    
+        //}
+    }
+
 }

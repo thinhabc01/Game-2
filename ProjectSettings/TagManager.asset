@@ -3,7 +3,15 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Missile
+  - player
+  - enemy
+  - wall
+  - box
+  - ground
+  - item1
+  - item2
   layers:
   - Default
   - TransparentFX

@@ -4,13 +4,14 @@ using UnityEngine;
 
 public class CharacterController : MonoBehaviour
 {
-    public enum Status { Run, Idle, Attack, Death }
+    public enum Status { Idle, Run, Attack, Death }
     public Status m_status;
 
     [SerializeField] Transform m_Transform;
     [SerializeField] GameObject m_Character;
 
     public float m_speed { get; set; }
+    public bool attack;
     private Animator m_AnCharacter;
     private Transform m_TrCharacter;
     public virtual void Start()
@@ -38,4 +39,5 @@ public class CharacterController : MonoBehaviour
     {
 
     }
+
 }

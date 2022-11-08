@@ -18,6 +18,24 @@ public class PlayerController : CharacterController
     {
         position = transform.position;
         Vector3 direction = Vector3.forward * floatingJoystick.Vertical + Vector3.right * floatingJoystick.Horizontal;
+        Vector3 point = direction + position;
         Move(direction);
+        if (point.x > -3f && point.x < 3f)
+        {
+
+
+        }
+    }
+    void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log(collision.gameObject.tag);
+        if (collision.gameObject.CompareTag("item1"))
+        {
+            Destroy(collision.gameObject);
+        }
+        if (collision.gameObject.CompareTag("item2"))
+        {
+            Destroy(collision.gameObject);
+        }
     }
 }
