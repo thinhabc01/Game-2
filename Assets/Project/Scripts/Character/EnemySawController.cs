@@ -10,9 +10,11 @@ public class EnemySawController : CharacterController
 
     PlayerController m_Player;
     public float timer = 0;
+    bool death;
     public override void Start()
     {
         base.Start();
+        death = false;
         m_speed = speedRun;
         m_Player = FindObjectOfType<PlayerController>();
         Run();
@@ -29,14 +31,14 @@ public class EnemySawController : CharacterController
             switch (m_status)
             {
                 case Status.Idle:
-                    yield return null;
                     m_status = Status.Run;
+                    yield return null;
                     break;
 
                 case Status.Attack:
                     attack = true;
-                    yield return new WaitForSeconds(1f);
                     m_status = Status.Run;
+                    yield return new WaitForSeconds(1f);
                     break;
 
                 case Status.Run:
@@ -46,7 +48,6 @@ public class EnemySawController : CharacterController
                         Vector3 direction = Vector3.Normalize(m_Player.position - transform.position);
                         Move(direction);
                         yield return null;
-
                     }
 
                     else
@@ -61,5 +62,24 @@ public class EnemySawController : CharacterController
                     break;
             }
         }
+    }
+    void OnCollisionEnter(Collision collision)
+    {
+        switch (collision.gameObject.tag)
+        {
+            case "Missile":
+                if (!death)
+                {
+                    death = true;
+                    m_status = Status.Death;
+                    Death();
+                }
+                break;
+        }
+    }
+    public override void Death()
+    {
+        base.Death();
+        m_gameController.EnemyDeath();
     }
 }

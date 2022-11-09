@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -55,6 +55,7 @@ public class Joystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         handle.anchorMax = center;
         handle.pivot = center;
         handle.anchoredPosition = Vector2.zero;
+        cam = canvas.worldCamera;
     }
 
     public virtual void OnPointerDown(PointerEventData eventData)
@@ -138,6 +139,7 @@ public class Joystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
     protected Vector2 ScreenPointToAnchoredPosition(Vector2 screenPosition)
     {
         Vector2 localPoint = Vector2.zero;
+
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(baseRect, screenPosition, cam, out localPoint))
         {
             Vector2 pivotOffset = baseRect.pivot * baseRect.sizeDelta;

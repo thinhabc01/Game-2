@@ -20,6 +20,7 @@ namespace EpicToonFX
         {
             m_Player = FindObjectOfType<PlayerController>();
             point = m_Player.position;
+
             Vector3 Towards = Vector3.Normalize(point - transform.position);
             temp = new Vector3(Towards.x, 0, Towards.z);
 
@@ -35,33 +36,32 @@ namespace EpicToonFX
 
         void FixedUpdate()
         {
-            if (type == "Bullet")
+            switch (type)
             {
-                float m_angle = Vector3.SignedAngle(Vector3.forward, temp, Vector3.up);
-                transform.eulerAngles = new Vector3(0, m_angle, 0);
-                transform.Translate(Vector3.forward * 10 * Time.deltaTime);
+                case "Bullet":
+                    float m_angle = Vector3.SignedAngle(Vector3.forward, temp, Vector3.up);
+                    transform.eulerAngles = new Vector3(0, m_angle, 0);
+                    transform.Translate(Vector3.forward * 10 * Time.deltaTime);
+                    break;
+                case "Rocket":
+                    Vector3 playerPosition = new Vector3(m_Player.position.x, transform.position.y, m_Player.position.z);
+                    transform.position = Vector3.MoveTowards(transform.position, playerPosition, 1.5f * Time.fixedDeltaTime);
+                    break;
+                case "Grenade":
+                    if (Vector3.Distance(point, transform.position) > 0.3f)
+                    {
+                        transform.position = Vector3.MoveTowards(transform.position, point, 5f * Time.fixedDeltaTime);
+                    }
+                    else
+                    {
+                        Bomb();
+                    }
+                    break;
+                case "Saw":
+                    StartCoroutine(Saw());
+                    break;
+            }
 
-            }
-            else if (type == "Rocket")
-            {
-                Vector3 temp = new Vector3(m_Player.position.x, transform.position.y, m_Player.position.z);
-                transform.position = Vector3.MoveTowards(transform.position, temp, 2f * Time.fixedDeltaTime);
-            }
-            else if (type == "Grenade")
-            {
-                if (Vector3.Distance(point, transform.position) > 0.2f)
-                {
-                    transform.position = Vector3.MoveTowards(transform.position, point, 5f * Time.fixedDeltaTime);
-                }
-                else
-                {
-                    Bomb();
-                }
-            }
-            else
-            {
-                StartCoroutine(Saw());
-            }
         }
         IEnumerator Saw()
         {
@@ -70,45 +70,62 @@ namespace EpicToonFX
         }
         private void Bomb()
         {
-            GameObject impactP = Instantiate(impactParticle, transform.position, Quaternion.identity) as GameObject; // Spawns impact effect
-
-            ParticleSystem[] trails = GetComponentsInChildren<ParticleSystem>(); // Gets a list of particle systems, as we need to detach the trails
-                                                                                 //Component at [0] is that of the parent i.e. this object (if there is any)
-            for (int i = 1; i < trails.Length; i++) // Loop to cycle through found particle systems
+            GameObject impactP = Instantiate(impactParticle, transform.position, Quaternion.identity) as GameObject;
+            ParticleSystem[] trails = GetComponentsInChildren<ParticleSystem>();
+            for (int i = 1; i < trails.Length; i++)
             {
                 ParticleSystem trail = trails[i];
 
                 if (trail.gameObject.name.Contains("Trail"))
                 {
-                    trail.transform.SetParent(null); // Detaches the trail from the projectile
-                    Destroy(trail.gameObject, 2f); // Removes the trail after seconds
+                    trail.transform.SetParent(null);
+                    Destroy(trail.gameObject, 2f);
                 }
             }
 
-            Destroy(projectileParticle, 3f); // Removes particle effect after delay
-            Destroy(impactP, 3.5f); // Removes impact effect after delay
-            Destroy(gameObject); // Removes the projectile
+            Destroy(projectileParticle, 3f);
+            Destroy(impactP, 3.5f);
+            Destroy(gameObject);
         }
         private void OnCollisionEnter(Collision collision)
         {
-            if (collision.gameObject.CompareTag("wall"))
+            //Debug.Log(collision.gameObject.tag);
+            switch (collision.gameObject.tag)
             {
-                if (type == "Bullet")
-                {
-                    temp = temp * -1;
-                }
-                else
-                {
+                case "wall":
+                    if (type == "Bullet")
+                    {
+                        if (Mathf.Abs(transform.position.z) >= 0.5f)
+                        {
+                            temp = new Vector3(temp.x, temp.y, temp.z * -1);
+                        }
+                        if (Mathf.Abs(transform.position.x) >= 0.5f)
+                        {
+                            temp = new Vector3(temp.x * -1, temp.y, temp.z);
+                        }
+
+                    }
+                    else
+                    {
+                        Bomb();
+                    }
+                    break;
+
+                case "player":
                     Bomb();
-                }
-            }
-            if (collision.gameObject.CompareTag("player"))
-            {
-                Bomb();
-            }
-            if (collision.gameObject.CompareTag("enemy"))
-            {
-                Bomb();
+                    break;
+
+                case "enemy":
+                    Bomb();
+                    break;
+
+                case "ground":
+                    Bomb();
+                    break;
+                case "box":
+                    Bomb();
+                    Destroy(collision.gameObject);
+                    break;
             }
         }
     }

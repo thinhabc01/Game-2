@@ -10,9 +10,11 @@ public class EnemyController : CharacterController
 
     PlayerController m_Player;
     public float timer = 0;
+    bool death;
     public override void Start()
     {
         base.Start();
+        death = false;
         m_speed = speedRun;
         m_Player = FindObjectOfType<PlayerController>();
         Run();
@@ -34,8 +36,8 @@ public class EnemyController : CharacterController
 
                 case Status.Attack:
                     attack = true;
-                    yield return new WaitForSeconds(1.5f);
                     m_status = Status.Run;
+                    yield return new WaitForSeconds(1.5f);
                     break;
 
                 case Status.Run:
@@ -48,7 +50,6 @@ public class EnemyController : CharacterController
                         timer = 0;
                     }
                     yield return null;
-
                     break;
 
                 default:
@@ -59,14 +60,21 @@ public class EnemyController : CharacterController
 
     void OnCollisionEnter(Collision collision)
     {
-        //if (collision.gameObject.tag.Equals("enemy"))
-        //{
-        //    m_status = Status.Death;
-        //}
-        //if (collision.gameObject.tag.Equals("win"))
-        //{
-
-        //}
+        switch (collision.gameObject.tag)
+        {
+            case "Missile":
+                if (!death)
+                {
+                    death = true;
+                    m_status = Status.Death;
+                    Death();
+                }
+                break;
+        }
     }
-
+    public override void Death()
+    {
+        base.Death();
+        m_gameController.EnemyDeath();
+    }
 }
